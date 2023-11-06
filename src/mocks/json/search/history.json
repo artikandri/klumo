@@ -1,0 +1,23 @@
+{
+    "mySearches": [
+        {
+            "text": "cat",
+            "lastSearched": "2020-12-01T12:00:05.000Z"
+        }
+    ],
+    "popularSearches": [
+        {
+            "text": "avengers",
+            "lastSearched": "2020-12-01T12:00:00.000Z"
+        },
+        {
+            "text": "mando",
+            "lastSearched": "2020-12-01T12:00:01.000Z"
+        },
+        {
+            "text": "hierophant",
+            "lastSearched": "2020-12-01T12:00:02.000Z"
+        }
+        
+    ]
+}

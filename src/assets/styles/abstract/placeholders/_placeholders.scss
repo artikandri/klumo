@@ -1,0 +1,41 @@
+
+
+// Visually hide an element
+%visuallyhidden {
+    margin: -1px;
+    padding: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip: rect(0, 0, 0, 0);
+    position: absolute;
+}
+
+// Input
+%clear-input {
+    width: 100%;
+    background: none;
+    outline: none;
+    box-shadow: none;
+    border: 0;
+}
+
+%container {
+    margin: 0 auto;
+    padding: 4em;
+
+  @include media("<=tablet") {
+    padding-left: 2em;
+  }
+}
+
+%vertical-align { 
+  &:before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;
+    width: 0.1px;
+  }
+}

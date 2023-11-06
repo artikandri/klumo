@@ -1,0 +1,131 @@
+html {
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  font-size: 100%;
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
+  }
+}
+
+body {
+  margin: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-family: $primary-font-family;
+  font-size: $base-font-size;
+  line-height: $base-line-height;
+  background: $bg;
+  min-height: 100vh;
+  color: $black-87;
+}
+
+a,
+button {
+  color: $black-54;
+}
+
+audio,
+img,
+svg,
+object,
+embed,
+canvas,
+video,
+iframe {
+  max-width: 100%;
+  font-style: italic;
+  vertical-align: middle;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  margin: 0;
+  vertical-align: baseline;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+a {
+  background: transparent;
+  &:focus {
+    outline: thin dotted;
+  }
+  &:hover,
+  &:active {
+    outline: 0;
+  }
+}
+
+[tabindex="-1"]:focus {
+  outline: none !important;
+}
+
+.svg-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  color: inherit;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+}
+
+.svg-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+.hidden-input {
+  @extend %visuallyhidden;
+}
+
+
+.--heading1 {
+  @include font-size(40px);
+  @include line-height(50px);
+
+  @include media("<=desktopSmall") {
+    @include font-size(36px);
+    @include line-height(44px);
+  }
+}
+
+.--body1 {
+  @include font-size(16px);
+  @include line-height(24px);
+
+  @include media("<=desktopSmall") {
+    @include font-size(14px);
+    @include line-height(21px);
+  }
+}
+
+.--semibold {
+  font-weight: 600;
+}
+.--medium {
+  font-weight: 500;
+}
+.--light {
+  font-weight: 300;
+}

@@ -4,6 +4,6 @@ import MainLayout from "@/layouts/MainLayout.vue";
 
 <template>
   <MainLayout>
-    home page
+    search page
   </MainLayout>
 </template>
