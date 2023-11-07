@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, defineEmits, defineProps, watch } from "vue";
+import router from "@/router/index";
 import { useSearchHistory } from "@/stores/search";
-import { randomDelay } from "@/utilities/utils";
+import { toKebabCase, randomValue } from "@/utilities/utils";
 import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
 
 // store
@@ -18,6 +19,7 @@ const emit = defineEmits(["fullscreen"]);
 
 // data
 const isHistoryShown = ref(false);
+const isFocused = ref(false);
 const searchValue = ref("");
 const placeholder = ref("");
 const searchBarKey = ref(1);
@@ -37,16 +39,22 @@ const isFullscreen = computed(() => {
 
 // methods
 const onSearchInputFocus = () => {
+  isFocused.value = true;
   isHistoryShown.value = true;
   emit("fullscreen", true);
 };
+const onSearchInputBlur = () => {
+  isFocused.value = false;
+};
 const onSearchInputEnter = () => {
   addMySearchHistory(searchValue.value);
+  router.push(`/search/${toKebabCase(searchValue.value)}`);
 };
 const onClearHistoryButtonClick = () => {
   searchHistory.mySearches = [];
 };
 const onCancelButtonClick = () => {
+  isHistoryShown.value = false;
   emit("fullscreen", false);
 };
 const startDeletionEffect = (text: string) => {
@@ -60,11 +68,12 @@ const startDeletionEffect = (text: string) => {
       clearInterval(deletionEffect);
     }
     placeholder.value = currentText;
-  }, randomDelay(100, 200));
+  }, randomValue(100, 200));
 };
 const startTypingEffect = () => {
   let currentTextIndex = 0;
   const texts = placeholderTextOptions;
+
   function typeText() {
     let currentText = "";
     let index = 0;
@@ -93,7 +102,7 @@ const startTypingEffect = () => {
         currentTextIndex = 0;
       }
       placeholder.value = currentText;
-    }, randomDelay(100, 200));
+    }, randomValue(100, 200));
   }
 
   typeText();
@@ -112,6 +121,7 @@ onMounted(() => {
   >
     <div class="search-bar__container">
       <input
+        :autofocus="isFullscreen"
         type="search"
         ref="searchInput"
         class="imitatefocus"
@@ -119,15 +129,15 @@ onMounted(() => {
         spellcheck="false"
         v-model.trim="searchValue"
         @focus="onSearchInputFocus"
+        @blur="onSearchInputBlur"
         @keydown.enter="onSearchInputEnter"
-        :placeholder="placeholderText"
+        :placeholder="isFocused ? placeholderText : ''"
       />
       <span
         class="placeholder-imitation"
-        :class="{'--blinking': isBlinking }"
+        :class="{'--blinking': isBlinking, '--visible': !isFocused }"
         ref="placeholderImitation"
       >Search for {{ placeholder  }}</span>
-      {{ fullscreen }}
       <BaseButton
         v-if="isFullscreen"
         text="Cancel"
@@ -144,8 +154,10 @@ onMounted(() => {
             <h2>
               Your search history
             </h2>
-            <BaseButton @click="onClearHistoryButtonClick">
-              Clear history
+            <BaseButton
+              @click="onClearHistoryButtonClick"
+              text="Clear history"
+            >
             </BaseButton>
           </div>
           <ul v-if="!searchValue">
@@ -184,15 +196,15 @@ onMounted(() => {
   </div>
 </template>
 <style lang="scss" scoped>
-@keyframes typewriter {
+@keyframes blink {
   from {
-    width: 0;
+    opacity: 1;
   }
-
   to {
-    width: 100%;
+    opacity: 0;
   }
 }
+
 .search-bar {
   padding: 0 16px;
 
@@ -214,51 +226,52 @@ onMounted(() => {
     box-sizing: border-box;
     border-radius: 20px;
     height: 40px;
-  }
-
-  input {
-    display: block;
-    width: 100%;
-    border: 0px;
-    margin: 0px;
-    line-height: 24px;
-    outline: none;
-    background-color: transparent;
-    padding: 8px 16px;
-    padding-left: 16px;
-    font-size: 1rem;
-    color: palette(black, base);
-
-    &::focus + .placeholder-imitation {
-      display: none;
-    }
-  }
-
-  .placeholder-imitation {
     position: relative;
-    display: inline-block;
 
-    @keyframes blink {
-      from {
-        opacity: 1;
-      }
-      to {
-        opacity: 0;
+    input {
+      display: block;
+      width: 100%;
+      border: 0px;
+      margin: 0px;
+      line-height: 24px;
+      outline: none;
+      background-color: transparent;
+      padding: 8px 16px;
+      padding-left: 16px;
+      font-size: 1rem;
+      color: palette(black, base);
+
+      &::focus + .placeholder-imitation {
+        display: none;
       }
     }
-    &.--blinking {
-      &::after {
-        content: "";
-        position: absolute;
-        right: -2px;
-        width: 1px;
-        height: 1rem;
-        background-color: gray;
-        top: 10%;
-        animation-name: blink;
-        animation-duration: 1000ms;
-        animation-iteration-count: infinite;
-        opacity: 1;
+
+    .placeholder-imitation {
+      position: relative;
+      display: none;
+      position: absolute;
+      top: 25%;
+      left: 12px;
+      font-size: 1rem;
+
+      &.--visible {
+        display: inline-block;
+      }
+
+      &.--blinking {
+        &::after {
+          content: "";
+          position: absolute;
+          right: -2px;
+          width: 1px;
+          height: 1rem;
+          background-color: gray;
+          top: 10%;
+          animation-name: blink;
+          animation-duration: 1000ms;
+          animation-iteration-count: infinite;
+          opacity: 1;
+        }
       }
     }
   }

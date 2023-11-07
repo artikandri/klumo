@@ -1,4 +1,4 @@
-export const randomDelay = (min, max) => {
+export const randomValue = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
@@ -10,6 +10,10 @@ export const isElementVisible = (el, holder) => {
   return top <= holderRect.top
     ? holderRect.top - top <= height
     : bottom - holderRect.bottom <= height;
+};
+
+export const toKebabCase = (text) => {
+  return text.split(" ").join("-").toLowerCase();
 };
 
 export const isInViewport = (element) => {

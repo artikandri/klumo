@@ -1,14 +1,18 @@
 [
     {
-        "text": "mandolarian"
+        "text": "mandolarian",
+        "similarity": 0.99
     },
     {
-        "text": "mandola"
+        "text": "mandola",
+        "similarity": 0.90
     },
     {
-        "text": "mandala"
+        "text": "mandala",
+        "similarity": 0.80
     },
     {
-        "text": "mandooooo"
+        "text": "mandooooo",
+        "similarity": 0.76
     }
 ]

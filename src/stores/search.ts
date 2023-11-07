@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import history from '@/mocks/json/search/history.json'
 import suggestions from '@/mocks/json/search/suggestions.json';
 
+import { randomValue } from "@/utilities/utils.js"
 
 export const useSearchHistory = defineStore('searchHistory', () => {
   const searchHistory = ref(history)
@@ -12,6 +13,14 @@ export const useSearchHistory = defineStore('searchHistory', () => {
     searchHistory.value.mySearches.push({
       text: history,
       lastSearched: new Date().toLocaleDateString(),
+    })
+  }
+
+
+  function addSuggestions(suggestion: string) {
+    searchSuggestions.value.push({
+      text: suggestion,
+      similarity: randomValue(0, 1)
     })
   }
 

@@ -11,7 +11,7 @@ export default {
     },
     text: {
       type: String,
-      default: "Button",
+      default: "",
     },
     disabled: {
       type: Boolean,
@@ -28,17 +28,25 @@ export default {
   <button
     :type="type"
     :disabled="disabled"
-    class="button"
+    class="base-button"
   >
     <div v-show="icon">
       <img
         :src="icon"
         class="svg-icon"
-        alt="icon"
       />
     </div>
-
     {{  text  }}
-    <slot />
   </button>
 </template>
+<style lang="scss" scoped>
+.base-button {
+  border: 0;
+  background-color: transparent;
+
+  &:hover {
+    background-color: palette(grey, 600);
+    text-decoration: underline;
+  }
+}
+</style>

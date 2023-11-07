@@ -8,6 +8,7 @@ import accountIcon from "@/assets/icons/account.png";
 import cartIcon from "@/assets/icons/cart.png";
 import searchIcon from "@/assets/icons/search.png";
 import closeIcon from "@/assets/icons/close.png";
+import menuIcon from "@/assets/icons/menu.png";
 
 export default {
   name: "Header",
@@ -23,6 +24,7 @@ export default {
       wishlistIcon,
       searchIcon,
       closeIcon,
+      menuIcon,
       isReplaced: false,
       isFullscreen: false,
       isMobileMenuVisible: false,
@@ -70,21 +72,20 @@ export default {
       <div class="header__content">
         <div class="menu-area">
           <BaseButton
+            :icon="menuIcon"
             class="menu-toggle"
             @click="onToggleButtonClick"
           >
-            <span
-              aria-hidden="true"
-              class="icon-menu"
-            ></span><span class="menu-toggle-text"> menu</span>
           </BaseButton>
         </div>
         <div class="logo-area">
-          <img
-            src="@/assets/logo.svg"
-            class="logo"
-            alt="Klumo logo"
-          />
+          <RouterLink to="/">
+            <img
+              src="@/assets/logo.svg"
+              class="logo"
+              alt="Klumo logo"
+            />
+          </RouterLink>
         </div>
         <div class="search-area">
           <div v-show="!isReplaced">
@@ -99,6 +100,7 @@ export default {
           <BaseButton
             v-if="isReplaced"
             :icon="searchIcon"
+            class="search-button"
             text="Search"
             @click="onSearchButtonClick"
           />
@@ -180,6 +182,12 @@ export default {
       justify-content: center;
       gap: 16px;
       margin-left: auto;
+
+      .search-button {
+        @include media(">tablet") {
+          display: none;
+        }
+      }
     }
   }
 
