@@ -156,6 +156,9 @@ const onSuggestionClick = (
 const onCheckAllResultsLinkClick = () => {
   setFullscreen(false);
   setIsHistoryShown(false);
+  if (window.innerWidth <= 768) {
+    setIsReplaced(true);
+  }
 };
 const goToSearchPage = (text: string = "") => {
   router.push(`/search/${toKebabCase(text || searchValue.value)}`);
