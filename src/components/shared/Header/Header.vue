@@ -157,6 +157,7 @@ export default {
     display: flex;
     flex-direction: row;
     padding: 0 16px;
+    align-items: flex-start;
 
     .menu-area {
       display: none;

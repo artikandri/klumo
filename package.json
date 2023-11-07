@@ -30,6 +30,7 @@
     "eslint": "^8.49.0",
     "eslint-plugin-vue": "^9.17.0",
     "jsdom": "^22.1.0",
+    "lodash": "^4.17.21",
     "npm-run-all2": "^6.1.1",
     "prettier": "^3.0.3",
     "sass": "^1.69.5",
