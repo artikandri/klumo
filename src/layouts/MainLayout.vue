@@ -12,7 +12,7 @@ import Header from "@/components/shared/Header/Header.vue";
   </div>
 </template>
 <style lang="scss" scoped>
-$gap-width: $base-space * 7;
+$gap-width: $base-space * 5;
 .layout {
   display: grid;
   grid-template-rows: auto 1fr;

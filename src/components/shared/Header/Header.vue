@@ -31,7 +31,6 @@ export default {
     const fullscreen = ref(false);
     const setFullscreen = (value: boolean) => {
       fullscreen.value = value;
-      console.log("test fullscreen");
     };
 
     const isMobileMenuVisible = ref(false);
@@ -98,8 +97,8 @@ export default {
       this.isMobileMenuVisible = false;
     },
     onClickingOutsideSearchEvent() {
-      if (this.$refs.searchBar.isHistoryShown) {
-        this.$refs.searchBar && this.$refs.searchBar.setIsHistoryShown(false);
+      if (this.$refs.searchBar && this.$refs.searchBar.isHistoryShown) {
+        this.$refs.searchBar.setIsHistoryShown(false);
         this.setFullscreen(false);
       }
     },
@@ -207,7 +206,7 @@ export default {
   &__content {
     display: flex;
     flex-direction: row;
-    padding: 20px $base-space * 7;
+    padding: 20px $base-space * 5;
     align-items: center;
     width: 100%;
     background-color: palette(white, base);
