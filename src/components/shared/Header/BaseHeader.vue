@@ -266,6 +266,8 @@ export default {
     .mobile-menu-area {
       text-align: right;
       padding: 20px;
+      display: flex;
+      justify-content: flex-end;
     }
 
     @include media("<=tablet") {

@@ -52,13 +52,18 @@ export default {
         :class="iconClass"
       />
     </div>
-    <span class="button-text">
+    <span
+      v-if="text"
+      class="button-text"
+    >
       {{  text  }}
     </span>
   </button>
 </template>
 <style lang="scss" scoped>
 .base-button {
+  display: flex;
+  flex-direction: column;
   border: 0;
   background-color: transparent;
   padding: 10px;

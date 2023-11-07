@@ -20,7 +20,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="header-actions">
     <slot name="searchIcon" />
     <BaseButton
       :icon="wishlistIcon"
@@ -36,3 +36,10 @@ export default {
     />
   </div>
 </template>
+
+<style lang="scss" scoped>
+.header-actions {
+  display: flex;
+  flex-direction: row;
+}
+</style>
