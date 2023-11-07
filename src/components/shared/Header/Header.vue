@@ -1,4 +1,5 @@
 <script lang="ts">
+import { provide, ref, setup } from "vue";
 import SearchBar from "@/components/shared/SearchBar/SearchBar.vue";
 import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
 import HeaderShortcuts from "@/components/shared/Header/components/HeaderShortcuts.vue";
@@ -26,9 +27,18 @@ export default {
       closeIcon,
       menuIcon,
       isReplaced: false,
-      isFullscreen: false,
       isMobileMenuVisible: false,
     };
+  },
+  setup() {
+    const fullscreen = ref(false);
+    const setFullscreen = (value: boolean) => {
+      fullscreen.value = value;
+    };
+
+    provide("fullscreen", { fullscreen, setFullscreen });
+
+    return { fullscreen, setFullscreen };
   },
   mounted() {
     window.addEventListener("scroll", this.onHeaderScroll);
@@ -43,16 +53,13 @@ export default {
     },
     onSearchButtonClick() {
       this.isReplaced = false;
-      this.isFullscreen = true;
+      this.setFullscreen(true);
     },
     onToggleButtonClick() {
       this.isMobileMenuVisible = !this.isMobileMenuVisible;
     },
     onCloseButtonClick() {
       this.isMobileMenuVisible = false;
-    },
-    onFullscreenEventChange(fullscreen: boolean) {
-      this.isFullscreen = fullscreen;
     },
   },
 };
@@ -89,11 +96,7 @@ export default {
         </div>
         <div class="search-area">
           <div v-show="!isReplaced">
-            <SearchBar
-              ref="searchBar"
-              :fullscreen="isFullscreen"
-              @fullscreen="onFullscreenEventChange"
-            />
+            <SearchBar ref="searchBar" />
           </div>
         </div>
         <div class="actions-area">
@@ -211,22 +214,6 @@ export default {
       position: fixed;
       top: 0;
       left: 0;
-    }
-
-    .shortcuts-list {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      gap: 8px;
-
-      @include media("<=tablet") {
-        flex-direction: column;
-        display: none;
-
-        &.--visible {
-          display: block;
-        }
-      }
     }
   }
 }

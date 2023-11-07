@@ -1,6 +1,6 @@
 
 <script lang="ts">
-import type { PropType, ButtonHTMLAttributes, ImgHTMLAttributes } from "vue";
+import { PropType, ButtonHTMLAttributes, ImgHTMLAttributes } from "vue";
 
 export default {
   name: "BaseButton",
@@ -29,6 +29,7 @@ export default {
     :type="type"
     :disabled="disabled"
     class="base-button"
+    v-bind="$attrs"
   >
     <div v-show="icon">
       <img

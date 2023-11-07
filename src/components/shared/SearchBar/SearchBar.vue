@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, defineEmits, defineProps, watch } from "vue";
+import {
+  ref,
+  onMounted,
+  computed,
+  defineEmits,
+  defineProps,
+  inject,
+} from "vue";
 import { uniqBy } from "lodash";
 import router from "@/router/index";
 import { useSearchHistory } from "@/stores/search";
@@ -10,13 +17,8 @@ import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
 const { searchHistory, searchSuggestions, addMySearchHistory, addSuggestions } =
   useSearchHistory();
 
-// props
-const props = defineProps({
-  fullscreen: Boolean,
-});
-
-// emits
-const emit = defineEmits(["fullscreen"]);
+// inject
+const { fullscreen, setFullscreen } = inject("fullscreen");
 
 // data
 const isHistoryShown = ref(false);
@@ -37,7 +39,7 @@ const searchSuggestionsFiltered = computed(() => {
   );
 });
 const isFullscreen = computed(() => {
-  return props.fullscreen;
+  return fullscreen.value as unknown as boolean;
 });
 const mySearches = computed(() => {
   return uniqBy(searchHistory.mySearches, "text");
@@ -53,7 +55,7 @@ const goToSearchPage = () => {
 const onSearchInputFocus = () => {
   isFocused.value = true;
   isHistoryShown.value = true;
-  emit("fullscreen", true);
+  setFullscreen(true);
 };
 const onSearchInputBlur = () => {
   isFocused.value = false;
@@ -68,7 +70,7 @@ const onClearHistoryButtonClick = () => {
 };
 const onCancelButtonClick = () => {
   isHistoryShown.value = false;
-  emit("fullscreen", false);
+  setFullscreen(false);
 };
 const onSuggestionClick = (suggestion: any) => {
   searchValue.value = suggestion.text;
@@ -137,33 +139,36 @@ onMounted(() => {
     :class="[isFullscreen ? '--fullscreen' : '']"
   >
     <div class="search-bar__container">
-      <input
-        :autofocus="isFullscreen"
-        type="search"
-        ref="searchInput"
-        class="imitatefocus"
-        autocomplete="off"
-        spellcheck="false"
-        v-model.trim="searchValue"
-        @focus="onSearchInputFocus"
-        @blur="onSearchInputBlur"
-        @keydown.enter="onSearchInputEnter"
-        :placeholder="isFocused && !searchValue ? placeholderText : ''"
-      />
-      <span
-        class="placeholder-imitation"
-        :class="{'--blinking': isBlinking, '--visible': !isFocused && !searchValue }"
-        ref="placeholderImitation"
-      >Search for {{ placeholder  }}</span>
+      <div class="search-bar-border">
+        <input
+          :autofocus="isFullscreen"
+          type="search"
+          ref="searchInput"
+          class="imitatefocus"
+          autocomplete="off"
+          spellcheck="false"
+          v-model.trim="searchValue"
+          @focus="onSearchInputFocus"
+          @blur="onSearchInputBlur"
+          @keydown.enter="onSearchInputEnter"
+          :placeholder="isFocused && !searchValue ? placeholderText : ''"
+        />
+        <span
+          class="placeholder-imitation"
+          :class="{'--blinking': isBlinking, '--visible': !isFocused && !searchValue }"
+          ref="placeholderImitation"
+        >Search for {{ placeholder  }}</span>
+      </div>
+
       <BaseButton
-        v-if="isFullscreen"
+        v-show="isFullscreen"
         text="Cancel"
         class="cancel-button"
         @click="onCancelButtonClick"
       />
     </div>
     <div
-      v-show="isHistoryShown"
+      v-if="isHistoryShown"
       class="search-bar__history"
     >
       <div class="history-container">
@@ -198,7 +203,7 @@ onMounted(() => {
                 <li
                   v-for="(popularSearch, idx) in popularSearches"
                   :key="`popular_search_${idx}`"
-                  @click="onSuggestionClick(popularSearch)"
+                  @click.native="onSuggestionClick(popularSearch)"
                   class="search-list__item"
                 >
                   {{ popularSearch.text }}
@@ -213,7 +218,7 @@ onMounted(() => {
             <li
               v-for="(suggestion, idx) in searchSuggestionsFiltered"
               :key="`search_suggestion_${idx}`"
-              @click="onSuggestionClick(suggestion)"
+              @click.native="onSuggestionClick(suggestion)"
               class="search-list__item"
             >
               {{  suggestion.text }}
@@ -255,14 +260,21 @@ onMounted(() => {
   }
 
   &__container {
-    background-color: palette(gray, 900);
-    margin-bottom: 0px;
-    border: 1px solid palette(black, 100);
-    box-sizing: border-box;
-    border-radius: 20px;
-    height: 40px;
+    display: flex;
+    flex-direction: row;
     position: relative;
     z-index: 1;
+    .search-bar-border {
+      background-color: palette(gray, 900);
+      margin-bottom: 0px;
+      border: 1px solid palette(black, 100);
+      box-sizing: border-box;
+      border-radius: 20px;
+      height: 40px;
+      display: flex;
+      flex-direction: row;
+      width: calc(100% - 50px);
+    }
 
     .cancel-button {
       @include media(">tablet") {
@@ -272,7 +284,7 @@ onMounted(() => {
 
     input {
       display: block;
-      width: 100%;
+      width: calc(100% - 50px);
       border: 0px;
       margin: 0px;
       line-height: 24px;

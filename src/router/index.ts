@@ -16,6 +16,11 @@ const router = createRouter({
       name: 'search',
       component: SearchView
     },
+    {
+      path: '/collections/:query',
+      name: 'collections',
+      component: SearchView
+    },
   ]
 })
 
