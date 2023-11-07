@@ -8,6 +8,7 @@ import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
 
 // ref
 const activeSearchItemId = ref("");
+const tabindex = ref(-1);
 
 // emit
 const emit = defineEmits(["update:searchValue"]);
@@ -16,6 +17,8 @@ const emit = defineEmits(["update:searchValue"]);
 const { searchValue, setSearchValue } = inject("searchValue");
 const { isHistoryShown, setIsHistoryShown } = inject("isHistoryShown");
 const { fullscreen, setFullscreen } = inject("fullscreen");
+const { setSearchInputBlur } = inject("searchInput");
+const { setIsReplaced } = inject("isReplaced");
 
 // store
 const { searchHistory, searchSuggestions, addMySearchHistory, addSuggestions } =
@@ -41,7 +44,11 @@ onMounted(() => {
 
 // methods
 const startKeyboardListeners = () => {
-  window.addEventListener("keyup", (e) => {
+  window.addEventListener("keydown", (e) => {
+    const checkMySearch = mySearches.value.length && !searchValue.value.length;
+    const target = checkMySearch ? mySearches : searchSuggestionsFiltered;
+    const targetKey = checkMySearch ? `my_search_` : `search_suggestion_`;
+
     if (isHistoryShown.value) {
       if (e.key === "Escape") {
         setIsHistoryShown(false);
@@ -49,55 +56,64 @@ const startKeyboardListeners = () => {
       }
 
       if (e.key === "ArrowDown") {
-        if (mySearches.value.length) {
-          let activeItemIdx = mySearches.value.findIndex((x) => x.active);
+        setSearchInputBlur();
+        tabindex.value = 0;
+        e.preventDefault();
+
+        if (target.value.length) {
+          let activeItemIdx = target.value.findIndex((x) => x.active);
           if (activeItemIdx !== -1) {
-            if (activeItemIdx < mySearches.value.length) {
+            if (activeItemIdx < target.value.length) {
               activeItemIdx += 1;
               if (activeItemIdx > 0) {
-                mySearches.value[activeItemIdx - 1].active = false;
+                target.value[activeItemIdx - 1].active = false;
               }
-              if (activeItemIdx < mySearches.value.length) {
-                mySearches.value[activeItemIdx].active = true;
+              if (target.value[activeItemIdx]) {
+                target.value[activeItemIdx].active = true;
               }
-              activeSearchItemId.value = `my_search_${activeItemIdx}`;
+              activeSearchItemId.value = `${targetKey}${activeItemIdx}`;
             }
           } else {
             activeItemIdx = 0;
-            activeSearchItemId.value = `my_search_${activeItemIdx}`;
-            mySearches.value[0].active = true;
+            activeSearchItemId.value = `${targetKey}${activeItemIdx}`;
+            target.value[0].active = true;
           }
         }
       }
 
       if (e.key === "ArrowUp") {
-        if (mySearches.value.length) {
-          let activeItemIdx = mySearches.value.findIndex((x) => x.active);
+        setSearchInputBlur();
+        tabindex.value = 0;
+        e.preventDefault();
+
+        if (target.value.length) {
+          let activeItemIdx = target.value.findIndex((x) => x.active);
           if (activeItemIdx !== -1) {
             if (activeItemIdx > 0) {
               activeItemIdx -= 1;
-              if (activeItemIdx < mySearches.value.length - 1) {
-                mySearches.value[activeItemIdx + 1].active = false;
+              if (activeItemIdx < target.value.length - 1) {
+                target.value[activeItemIdx + 1].active = false;
               }
-              if (activeItemIdx > 0) {
-                mySearches.value[activeItemIdx].active = true;
+              if (target.value[activeItemIdx]) {
+                target.value[activeItemIdx].active = true;
               }
-              activeSearchItemId.value = `my_search_${activeItemIdx}`;
+              activeSearchItemId.value = `${targetKey}${activeItemIdx}`;
             }
           } else {
             activeItemIdx = 0;
-            activeSearchItemId.value = `my_search_${activeItemIdx}`;
-            mySearches.value[0].active = true;
+            activeSearchItemId.value = `${targetKey}${activeItemIdx}`;
+            target.value[0].active = true;
           }
         }
       }
 
       if (e.key === "Enter") {
-        if (mySearches.value.length) {
-          let activeItemIdx = mySearches.value.findIndex((x) => x.active);
-          if (activeItemIdx !== -1) {
-            onSuggestionClick(mySearches.value[activeItemIdx]);
-            emit("update:searchValue", mySearches.value[activeItemIdx].text);
+        if (target.value.length) {
+          let activeItemIdx = target.value.findIndex((x) => x.active);
+          if (activeItemIdx >= 0 && target.value[activeItemIdx]) {
+            onSuggestionClick(target.value[activeItemIdx], checkMySearch);
+            emit("update:searchValue");
+            activeSearchItemId.value = "";
           }
         }
       }
@@ -107,108 +123,175 @@ const startKeyboardListeners = () => {
 const onClearHistoryButtonClick = () => {
   searchHistory.mySearches = [];
 };
-const onSuggestionClick = (suggestion: any) => {
-  searchValue.value = suggestion.text;
+const onSuggestionClick = (
+  suggestion: any,
+  addToSuggestion: boolean = false
+) => {
+  setSearchValue(suggestion.text);
+  setIsHistoryShown(false);
+  setFullscreen(false);
   goToSearchPage(suggestion.text);
-  setIsHistoryShown(false);
-  setFullscreen(false);
-};
-const onBackgroundClick = () => {
-  setIsHistoryShown(false);
-  setFullscreen(false);
+  if (window.innerWidth <= 768) {
+    setIsReplaced(true);
+  }
+  if (addToSuggestion) {
+    addSuggestions(suggestion.text);
+  }
 };
 const onCheckAllResultsLinkClick = () => {
   setFullscreen(false);
   setIsHistoryShown(false);
 };
-const goToSearchPage = (text: string) => {
-  router.push(`/search/${toKebabCase(searchValue.value || text)}`);
+const goToSearchPage = (text: string = "") => {
+  router.push(`/search/${toKebabCase(text || searchValue.value)}`);
 };
 const generateLink = (text: string) => {
   return `/search/${toKebabCase(text)}`;
 };
 </script>
 <template>
-  <div class="history-container">
-    <div>
-      <div v-if="!searchValue">
-        <div v-if="mySearches.length">
+  <div
+    class="history-container"
+    ref="historyContainer"
+    :tabindex="tabindex"
+  >
+    <div v-if="!searchValue">
+      <div
+        class="my-search"
+        v-if="mySearches.length"
+      >
+        <div class="my-search__header">
           <h2>
             Your search history
           </h2>
           <BaseButton
+            class="clear-history-button"
             @click="onClearHistoryButtonClick"
+            variant="clean"
             text="Clear history"
           >
           </BaseButton>
-          <ul class="search-list">
-            <li
-              v-for="(mySearch, idx) in mySearches.slice(0, 5)"
-              :key="`my_search_${idx}`"
-              @click="onSuggestionClick(mySearch)"
-              class="search-list__item"
-              :class="{'--active': activeSearchItemId === `my_search_${idx}`}"
-            >
-              <RouterLink :to="generateLink(mySearch.text)">
-                {{ mySearch.text }}
-              </RouterLink>
-            </li>
-          </ul>
         </div>
+        <ul class="search-list --my-search">
+          <li
+            v-for="(mySearch, idx) in mySearches.slice(0, 5)"
+            :key="`my_search_${idx}`"
+            @click="onSuggestionClick(mySearch, true)"
+            class="search-list__item --my-search"
+            :class="{'--active': activeSearchItemId === `my_search_${idx}`}"
+          >
+            <RouterLink :to="generateLink(mySearch.text)">
+              {{ mySearch.text }}
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
 
-        <div>
+      <div class="popular-search">
+        <div class="popular-search__header">
           <h2>
             Popular searches
           </h2>
-          <ul class="search-list">
-            <li
-              v-for="(popularSearch, idx) in popularSearches"
-              :key="`popular_search_${idx}`"
-              @click="onSuggestionClick(popularSearch)"
-              class="search-list__item"
-            >
-              <RouterLink :to="generateLink(popularSearch.text)">
-                {{ popularSearch.text }}
-              </RouterLink>
-            </li>
-          </ul>
         </div>
+        <ul class="search-list --popular">
+          <li
+            v-for="(popularSearch, idx) in popularSearches"
+            :key="`popular_search_${idx}`"
+            @click="onSuggestionClick(popularSearch, true)"
+            class="search-list__item --popular"
+          >
+            <RouterLink :to="generateLink(popularSearch.text)">
+              {{ popularSearch.text }}
+            </RouterLink>
+          </li>
+        </ul>
       </div>
-      <ul
-        v-else
-        class="search-list"
-      >
-        <li
-          v-for="(suggestion, idx) in searchSuggestionsFiltered"
-          :key="`search_suggestion_${idx}`"
-          @click="onSuggestionClick(suggestion)"
-          class="search-list__item"
-        >
-          <RouterLink :to="generateLink(suggestion.text)">
-            {{ suggestion.text }}
-          </RouterLink>
-        </li>
-      </ul>
-      <RouterLink
-        v-if="searchValue"
-        :to="generateLink(searchValue)"
-        @click="onCheckAllResultsLinkClick"
-      >
-        Check all results for "{{ searchValue }}"
-      </RouterLink>
     </div>
-    <div
-      class="background"
-      @click="onBackgroundClick"
-    ></div>
+    <ul
+      v-else
+      class="search-list --suggestion"
+    >
+      <li
+        v-for="(suggestion, idx) in searchSuggestionsFiltered"
+        :key="`search_suggestion_${idx}`"
+        @click="onSuggestionClick(suggestion, false)"
+        class="search-list__item --suggestion"
+        :class="{'--active': activeSearchItemId === `search_suggestion_${idx}`}"
+      >
+        <RouterLink :to="generateLink(suggestion.text)">
+          {{ suggestion.text }}
+        </RouterLink>
+      </li>
+    </ul>
+    <RouterLink
+      v-if="searchValue"
+      class="check-all-results-link"
+      :to="generateLink(searchValue)"
+      @click="onCheckAllResultsLinkClick"
+    >
+      Check all results for "{{ searchValue }}"
+    </RouterLink>
   </div>
 </template>
 <style lang="scss" scoped>
+.history-container {
+  .my-search {
+    margin-bottom: 10px;
+    &__header {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 10px;
+      align-items: center;
+
+      .clear-history-button {
+        margin-left: auto;
+      }
+    }
+  }
+
+  .popular-search {
+    &__header {
+      margin-bottom: 10px;
+    }
+  }
+}
 .search-list {
   &__item {
     padding: 10px;
     margin: 0;
-    display: block;
+    display: flex;
+
+    &.--my-search {
+      &::before {
+        content: "";
+        background-image: url("@/assets/icons/recent.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        height: 20px;
+        width: 20px;
+        margin-right: 10px;
+        background-position: center;
+        display: inline-block;
+      }
+    }
+
+    &.--suggestion {
+      &::before {
+        content: "";
+        background-image: url("@/assets/icons/search.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        height: 20px;
+        width: 20px;
+        margin-right: 10px;
+        background-position: center;
+        display: inline-block;
+      }
+    }
+
+    > a {
+      text-decoration: none;
+    }
 
     &.--active {
       background-color: palette(grey, 600);
@@ -218,6 +301,44 @@ const generateLink = (text: string) => {
       background-color: palette(grey, 600);
       cursor: pointer;
     }
+  }
+
+  &.--popular {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .search-list__item {
+      background-color: palette(grey, 500);
+      max-width: 100px;
+      display: inline-block;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      border-radius: 20px;
+      padding: 5px 10px;
+
+      &:hover {
+        background-color: palette(grey, 400);
+      }
+
+      > a {
+        color: palette(white, base);
+      }
+
+      & + .search-list__item {
+        margin-left: 5px;
+      }
+    }
+  }
+}
+
+.check-all-results-link {
+  text-decoration: none;
+  padding: 10px;
+  display: block;
+
+  &:hover {
+    background-color: palette(grey, 600);
   }
 }
 </style>

@@ -9,6 +9,14 @@ export default {
       type: String as PropType<ButtonHTMLAttributes["type"]>,
       default: "button",
     },
+    variant: {
+      type: String,
+      default: "default",
+    },
+    iconSize: {
+      type: String,
+      default: "small",
+    },
     text: {
       type: String,
       default: "",
@@ -22,12 +30,18 @@ export default {
       default: "",
     },
   },
+  computed: {
+    iconClass(): string {
+      return this.iconSize ? `--${this.iconSize}` : "";
+    },
+  },
 };
 </script>
 <template>
   <button
     :type="type"
     :disabled="disabled"
+    :class="{ '--disabled': disabled, '--has-icon': icon, [`--${variant}`]: variant }"
     class="base-button"
     v-bind="$attrs"
   >
@@ -35,19 +49,44 @@ export default {
       <img
         :src="icon"
         class="svg-icon"
+        :class="iconClass"
       />
     </div>
-    {{  text  }}
+    <span class="button-text">
+      {{  text  }}
+    </span>
   </button>
 </template>
 <style lang="scss" scoped>
 .base-button {
   border: 0;
   background-color: transparent;
+  padding: 10px;
+  cursor: pointer;
+  opacity: 1;
 
-  &:hover {
-    background-color: palette(grey, 600);
-    text-decoration: underline;
+  &.--default {
+    &:hover {
+      text-decoration: underline;
+      opacity: 0.8;
+    }
+  }
+
+  &.--clean {
+    font-weight: 500;
+
+    &:hover {
+      color: darken(palette(cyan, base), 50%);
+    }
+  }
+
+  &.--has-icon {
+    .button-text {
+      font-size: 0.75rem;
+      margin-top: 5px;
+      display: inline-block;
+      text-align: center;
+    }
   }
 }
 </style>

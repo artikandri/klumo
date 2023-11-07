@@ -20,6 +20,11 @@ export const useSearchHistory = defineStore('searchHistory', () => {
       search.active = false;
     })
   }
+  function setAllSuggestionsInactive() {
+    searchSuggestions.value.forEach((search) => {
+      search.active = false;
+    })
+  }
 
   function addSuggestions(suggestion: string) {
     suggestion && searchSuggestions.value.unshift({
@@ -28,6 +33,8 @@ export const useSearchHistory = defineStore('searchHistory', () => {
     })
   }
 
-  return { searchHistory, searchSuggestions, addMySearchHistory, setAllMySearchesInactive, addSuggestions }
+  return { searchHistory, searchSuggestions, 
+    setAllMySearchesInactive, setAllSuggestionsInactive, 
+    addMySearchHistory, addSuggestions }
 })
 

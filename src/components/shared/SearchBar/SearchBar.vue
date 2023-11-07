@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, provide, inject } from "vue";
+import {
+  ref,
+  onMounted,
+  computed,
+  provide,
+  inject,
+  defineExpose,
+  watch,
+} from "vue";
 import router from "@/router/index";
 import { useSearchHistory } from "@/stores/search";
 import { toKebabCase, randomValue } from "@/utilities/utils";
@@ -8,11 +16,16 @@ import SearchHistory from "./components/SearchHistory.vue";
 import closeIcon from "@/assets/icons/close.png";
 
 // store
-const { addMySearchHistory, setAllMySearchesInactive, addSuggestions } =
-  useSearchHistory();
+const {
+  addMySearchHistory,
+  setAllMySearchesInactive,
+  setAllSuggestionsInactive,
+  addSuggestions,
+} = useSearchHistory();
 
 // inject
 const { fullscreen, setFullscreen } = inject("fullscreen");
+const { setIsReplaced } = inject("isReplaced");
 
 // data
 const isHistoryShown = ref(false);
@@ -21,20 +34,6 @@ const searchValue = ref("");
 const placeholder = ref("");
 let isBlinking = ref(false);
 const searchInput = ref("searchInput");
-
-// provide
-provide("searchValue", {
-  searchValue,
-  setSearchValue: (value: string) => {
-    searchValue.value = value;
-  },
-});
-provide("isHistoryShown", {
-  isHistoryShown,
-  setIsHistoryShown: (value: boolean) => {
-    isHistoryShown.value = value;
-  },
-});
 
 // static
 const placeholderText = "Search for designs";
@@ -66,12 +65,19 @@ const onSearchInputEnter = (event: any) => {
     setFullscreen(false);
     event.target.blur();
     setAllMySearchesInactive();
+
+    if (window.innerWidth <= 768) {
+      setIsReplaced(true);
+    }
   }
 };
 const onCancelButtonClick = () => {
   isHistoryShown.value = false;
   setFullscreen(false);
   searchValue.value = "";
+  if (window.innerWidth <= 768) {
+    setIsReplaced(true);
+  }
 };
 const onDeleteButtonClick = () => {
   searchValue.value = "";
@@ -83,6 +89,7 @@ const onUpdateSearchValueEvent = () => {
   setFullscreen(false);
   searchInput.value.blur();
   setAllMySearchesInactive();
+  setAllSuggestionsInactive();
 };
 const startDeletionEffect = (text: string) => {
   let currentText = text;
@@ -134,6 +141,41 @@ const startTypingEffect = () => {
 
   typeText();
 };
+const setIsHistoryShown = (value: boolean) => {
+  isHistoryShown.value = value;
+};
+const setInputFocus = (value: boolean) => {
+  if (value) {
+    searchInput.value.focus();
+  } else {
+    searchInput.value.blur();
+  }
+};
+
+// provide
+provide("searchValue", {
+  searchValue,
+  setSearchValue: (value: string) => {
+    searchValue.value = value;
+  },
+});
+provide("isHistoryShown", {
+  isHistoryShown,
+  setIsHistoryShown,
+});
+provide("searchInput", {
+  searchInput,
+  setSearchInputBlur: () => {
+    searchInput.value.blur();
+  },
+});
+
+// expose
+defineExpose({
+  isHistoryShown,
+  setIsHistoryShown,
+  setInputFocus,
+});
 </script>
 <template>
   <div
@@ -141,11 +183,14 @@ const startTypingEffect = () => {
     :class="[fullscreen ? '--fullscreen' : '']"
   >
     <div class="search-bar__container">
-      <div class="search-bar-border">
+      <div
+        class="search-bar-border"
+        :class="{'--fullscreen' : fullscreen}"
+      >
         <img
           src="@/assets/icons/search.png"
           alt="search"
-          class="svg-icon"
+          class="svg-icon search-icon"
         />
         <input
           :autofocus="fullscreen"
@@ -176,6 +221,7 @@ const startTypingEffect = () => {
       <BaseButton
         v-show="fullscreen"
         text="Cancel"
+        variant="clean"
         class="cancel-button"
         @click="onCancelButtonClick"
       />
@@ -210,6 +256,12 @@ const startTypingEffect = () => {
       width: 100vw;
       left: 0;
       top: 0;
+      padding: 40px 20px;
+      background-color: palette(white, base);
+
+      .search-bar__history {
+        padding-top: 120px;
+      }
     }
   }
 
@@ -220,14 +272,22 @@ const startTypingEffect = () => {
     z-index: 1;
     .search-bar-border {
       background-color: palette(gray, 900);
-      margin-bottom: 0px;
       border: 1px solid palette(black, 100);
+      margin: 0 auto;
       box-sizing: border-box;
       border-radius: 20px;
       height: 40px;
       display: flex;
       flex-direction: row;
-      width: calc(100% - 50px);
+      width: calc(100% - 40px);
+      flex-shrink: 1;
+      position: relative;
+
+      .search-icon {
+        position: absolute;
+        left: 20px;
+        top: 12px;
+      }
     }
 
     .cancel-button {
@@ -245,11 +305,15 @@ const startTypingEffect = () => {
       outline: none;
       background-color: transparent;
       padding: 8px 16px;
-      padding-left: 16px;
+      padding-left: 40px;
       font-size: 1rem;
       color: palette(black, base);
       z-index: 1;
       position: relative;
+
+      @include media("<=tablet") {
+        font-size: 0.875rem;
+      }
 
       &::focus + .placeholder-imitation {
         display: none;
@@ -261,9 +325,13 @@ const startTypingEffect = () => {
       display: none;
       position: absolute;
       top: 25%;
-      left: 12px;
+      left: 40px;
       font-size: 1rem;
       z-index: 0;
+
+      @include media("<=tablet") {
+        font-size: 0.875rem;
+      }
 
       &.--visible {
         display: inline-block;
@@ -289,14 +357,19 @@ const startTypingEffect = () => {
 
   &__history {
     background: palette(white, base);
-    padding: 50px 20px 20px;
+    padding: 60px 20px 20px;
     display: block;
-    border: 1px solid #ddd;
     position: absolute;
     left: 0;
-    top: 0;
+    top: -10px;
     z-index: 0;
     width: 100%;
+
+    @include media(">tablet") {
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    }
 
     .background {
       height: 100vh;

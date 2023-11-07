@@ -6,25 +6,36 @@ import Header from "@/components/shared/Header/Header.vue";
     <div class="header-area">
       <Header />
     </div>
-    <slot />
+    <div class="content-area">
+      <slot />
+    </div>
   </div>
 </template>
 <style lang="scss" scoped>
 $gap-width: $base-space * 7;
 .layout {
   display: grid;
-  grid-template-columns: $sidebarMenuWidth $gap-width 1fr $gap-width;
-  grid-template-rows: auto auto minmax(0, 1fr) $base-space * 2 auto;
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
-  transition: 0.4s ease-in-out;
-  min-height: 100vh;
-
-  // for scrolling purpose:
-  height: 150vh;
+  grid-template-rows: auto 1fr;
+  align-items: start;
 }
 
 .header-area {
-  grid-area: 1 / 1 / 2 / 6;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+.content-area {
+  position: relative;
+  z-index: 0;
+  padding: $gap-width;
+
+  @include media("<=tablet") {
+    padding-top: $base-space * 12;
+  }
+
+  // for scrolling purpose:
+  background-color: palette(grey, 800);
 }
 </style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { provide, ref, setup } from "vue";
+import { provide, ref, setup, inject } from "vue";
 import SearchBar from "@/components/shared/SearchBar/SearchBar.vue";
 import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
 import HeaderShortcuts from "@/components/shared/Header/components/HeaderShortcuts.vue";
@@ -22,13 +22,16 @@ export default {
       searchIcon,
       closeIcon,
       menuIcon,
-      isReplaced: false,
+      windowWidth: 0,
+      key: 0,
+      isMobile: true,
     };
   },
   setup() {
     const fullscreen = ref(false);
     const setFullscreen = (value: boolean) => {
       fullscreen.value = value;
+      console.log("test fullscreen");
     };
 
     const isMobileMenuVisible = ref(false);
@@ -36,39 +39,69 @@ export default {
       isMobileMenuVisible.value = value;
     };
 
+    const isReplaced = ref(false);
+    const setIsReplaced = (value: boolean) => {
+      isReplaced.value = value;
+    };
+
     provide("fullscreen", { fullscreen, setFullscreen });
     provide("isMobileMenuVisible", {
       isMobileMenuVisible,
       setIsMobileMenuVisible,
     });
+    provide("isReplaced", {
+      isReplaced,
+      setIsReplaced,
+    });
 
     return {
       fullscreen,
-      setFullscreen,
       isMobileMenuVisible,
+      isReplaced,
+      setFullscreen,
       setIsMobileMenuVisible,
+      setIsReplaced,
     };
   },
   mounted() {
-    window.addEventListener("scroll", this.onHeaderScroll);
+    this.setWindowWidth();
+    if (this.windowWidth > 768) {
+      window.addEventListener("scroll", this.onHeaderScroll);
+    }
   },
   unmounted() {
     window.removeEventListener("scroll", this.onHeaderScroll);
   },
   methods: {
+    setWindowWidth() {
+      this.windowWidth = window.innerWidth;
+      if (this.windowWidth <= 768) {
+        this.setIsReplaced(true);
+        this.isMobile = true;
+      }
+    },
     onHeaderScroll() {
       const hasReachedPoint = window.scrollY >= 100;
-      this.isReplaced = hasReachedPoint;
+      this.setIsReplaced(hasReachedPoint);
     },
     onSearchButtonClick() {
-      this.isReplaced = false;
+      this.setIsReplaced(false);
       this.setFullscreen(true);
+      this.fullscreen = true;
+      this.key += 1;
+      this.$refs.searchBar && this.$refs.searchBar.setInputFocus(true);
     },
     onToggleButtonClick() {
       this.isMobileMenuVisible = !this.isMobileMenuVisible;
     },
     onCloseButtonClick() {
       this.isMobileMenuVisible = false;
+    },
+    onClickingOutsideSearchEvent() {
+      if (this.$refs.searchBar.isHistoryShown) {
+        this.$refs.searchBar && this.$refs.searchBar.setIsHistoryShown(false);
+        this.setFullscreen(false);
+      }
     },
   },
 };
@@ -77,7 +110,7 @@ export default {
   <header
     ref="header"
     class="header-container"
-    :class="{'--fixed': isReplaced }"
+    :key="key"
   >
     <div class="header">
       <div class="header__slogan">
@@ -90,6 +123,7 @@ export default {
           <BaseButton
             :icon="menuIcon"
             class="menu-toggle"
+            icon-size="2x"
             @click="onToggleButtonClick"
           >
           </BaseButton>
@@ -103,8 +137,11 @@ export default {
             />
           </RouterLink>
         </div>
-        <div class="search-area">
-          <div v-show="!isReplaced">
+        <div
+          class="search-area"
+          v-click-out="onClickingOutsideSearchEvent"
+        >
+          <div v-if="!isReplaced">
             <SearchBar ref="searchBar" />
           </div>
         </div>
@@ -124,15 +161,22 @@ export default {
       </div>
       <div
         class="header__shortcuts"
-        :class="{'--mobile' : isMobileMenuVisible, '--visible': !isReplaced, '--hidden': isReplaced }"
+        :class="{'--mobile' : isMobileMenuVisible, '--down': !isReplaced, '--up': isReplaced }"
       >
-        <HeaderShortcuts :class="{'--visible' : isMobileMenuVisible}" />
-        <BaseButton
+        <div
+          class="mobile-menu-area"
           v-if="isMobileMenuVisible"
-          :icon="closeIcon"
-          text="Close"
-          @click="onCloseButtonClick"
-        />
+        >
+          <BaseButton
+            :icon="closeIcon"
+            text="Close"
+            variant="clean"
+            @click="onCloseButtonClick"
+          />
+        </div>
+        <div class="shortcuts-list-area">
+          <HeaderShortcuts :class="{'--visible' : isMobileMenuVisible}" />
+        </div>
       </div>
     </div>
   </header>
@@ -140,8 +184,9 @@ export default {
 
 <style scoped lang="scss">
 .header-container {
-  position: fixed;
-  width: 100%;
+  position: sticky;
+  top: 0;
+  left: 0;
 }
 
 .header {
@@ -151,33 +196,47 @@ export default {
 
   &__slogan {
     background-color: palette(cyan, base);
-    display: block;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 37px;
     font-weight: 300;
+    border-bottom: 1px solid palette(grey, 600);
   }
 
   &__content {
     display: flex;
     flex-direction: row;
-    padding: 0 16px;
-    align-items: flex-start;
+    padding: 20px $base-space * 7;
+    align-items: center;
+    width: 100%;
+    background-color: palette(white, base);
+    border-bottom: 1px solid palette(grey, 600);
 
     .menu-area {
       display: none;
+
       @include media("<=tablet") {
         display: block;
+        flex-shrink: 0;
+        z-index: 1;
       }
     }
 
-    .logo {
-      height: 40px;
+    .logo-area {
+      flex-shrink: 0;
+      z-index: 1;
+
+      .logo {
+        height: 40px;
+      }
     }
 
     .search-area {
       margin-left: auto;
       margin-right: auto;
       width: 100%;
+      z-index: 2;
     }
 
     .actions-area {
@@ -187,6 +246,8 @@ export default {
       justify-content: center;
       gap: 16px;
       margin-left: auto;
+      flex-shrink: 0;
+      z-index: 1;
 
       .search-button {
         @include media(">tablet") {
@@ -198,22 +259,36 @@ export default {
 
   &__shortcuts {
     width: 100%;
-    transition: margin-top 0.3s ease 0s;
+    transition: margin-top 0.3s ease 0s, background-color 0.3s ease-out 0s;
+    border-bottom: 1px solid palette(grey, 600);
 
-    &.--visible {
-      margin-top: 0;
+    .mobile-menu-area {
+      text-align: right;
+      padding: 20px;
     }
 
-    &.--hidden {
-      margin-top: -57px;
+    @include media("<=tablet") {
+      border-bottom: 0;
+    }
+
+    &.--down {
+      margin-top: 0;
+      background-color: palette(white, base);
+    }
+
+    &.--up {
+      border-bottom: 0;
+      margin: -80px auto 0;
+      background-color: transparent;
+      z-index: 0;
     }
 
     &.--mobile {
       height: 100vh;
-      width: 100vh;
+      width: 100vw;
       display: block;
       position: fixed;
-      top: 0;
+      top: 80px;
       left: 0;
       z-index: 10;
       background: palette(white, base);

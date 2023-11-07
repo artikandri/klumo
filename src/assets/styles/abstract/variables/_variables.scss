@@ -14,8 +14,9 @@ $palettes: (
     200: #4d4d4d,
     300: #686a6d,
     400: #838589,
-    600: #e6e6e6,
-    700: #FCFCFC,
+    500: #9e9fa5,
+    600: #ccc,
+    700: #ddd,
     800: #F0F0F0,
     900: #fafafa
   ),
@@ -33,16 +34,6 @@ $brand-light-grey: palette(grey, 800);
 $brand-error: palette(red, base);
 $bg: pallete(grey, 800);
 
-
-// Black opacity
-//-----------
-$black-87: rgba(0, 0, 0, 0.87);
-$black-54: rgba(0, 0, 0, 0.6);
-$black-37: rgba(0, 0, 0, 0.37);
-$black-20: rgba(0, 0, 0, 0.2);
-$black-10: rgba(0, 0, 0, 0.1);
-$black-4: rgba(0, 0, 0, 0.04);
-
 // Fonts
 //-----------
 $primary-font-family: "Montserrat", "Helvetica", "Arial", sans-serif;
@@ -51,36 +42,7 @@ $secondary-font-family: "Quicksand", "Helvetica", "Arial",
 $base-font-size: 14px;
 $base-line-height: 1.4em;
 
-// Grid
-//-----------
-$maxwidth: 980px;
-
 // Spaces
 //-----------
 $base-space: 8px;
-$base-space-between-records: $base-space;
 
-// Border radius
-//---------------
-$border-radius-s: 5px;
-$border-radius: 5px;
-$border-radius-m: 10px;
-$border-radius-l: 25px;
-$border-radius-rounded: 50em;
-
-// Input size
-//-----------
-$input-size: 40px;
-
-// Buttons
-//-----------
-$button-height: 30px;
-$button-radius: 6px;
-
-// topbar
-$topbarHeight: 56px;
-
-// sidebar
-$sidebarPanelWidth: 280px;
-$sidebarMenuWidth: 70px;
-$sidebarWidth: $sidebarPanelWidth + $sidebarMenuWidth;
