@@ -6,6 +6,12 @@ import { toKebabCase } from "@/utilities/utils";
 import { uniqBy } from "lodash";
 import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
 
+import type IsHistoryShown from "@/types/IsHistoryShown";
+import type IsReplaced from "@/types/IsReplaced";
+import type Fullscreen from "@/types/Fullscreen";
+import type SearchValue from "@/types/SearchValue";
+import type SearchInput from "@/types/SearchInput";
+
 // ref
 const activeSearchItemId = ref("");
 const tabindex = ref(-1);
@@ -14,15 +20,24 @@ const tabindex = ref(-1);
 const emit = defineEmits(["update:searchValue"]);
 
 // injects
-const { searchValue, setSearchValue } = inject("searchValue");
-const { isHistoryShown, setIsHistoryShown } = inject("isHistoryShown");
-const { fullscreen, setFullscreen } = inject("fullscreen");
-const { setSearchInputBlur } = inject("searchInput");
-const { setIsReplaced } = inject("isReplaced");
+const { searchValue, setSearchValue } = inject("searchValue", {
+  searchValue: ref(""),
+  setSearchValue: (value: string) => {},
+}) as SearchValue;
+const { isHistoryShown, setIsHistoryShown } = inject("isHistoryShown", {
+  isHistoryShown: false,
+  setIsHistoryShown: (value: boolean) => {},
+}) as unknown as IsHistoryShown;
+const { setFullscreen } = inject("fullscreen") as unknown as Fullscreen;
+const { setSearchInputBlur } = inject("searchInput", {
+  setSearchInputBlur: () => {},
+}) as unknown as SearchInput;
+const { setIsReplaced } = inject("isReplaced", {
+  setIsReplaced: (value: boolean) => {},
+}) as unknown as IsReplaced;
 
 // store
-const { searchHistory, searchSuggestions, addMySearchHistory, addSuggestions } =
-  useSearchHistory();
+const { searchHistory, searchSuggestions, addSuggestions } = useSearchHistory();
 
 // computed
 const mySearches = computed(() => {
@@ -61,7 +76,7 @@ const startKeyboardListeners = () => {
         e.preventDefault();
 
         if (target.value.length) {
-          let activeItemIdx = target.value.findIndex((x) => x.active);
+          let activeItemIdx = target.value.findIndex((x: any) => x.active);
           if (activeItemIdx !== -1) {
             if (activeItemIdx < target.value.length) {
               activeItemIdx += 1;
@@ -87,7 +102,7 @@ const startKeyboardListeners = () => {
         e.preventDefault();
 
         if (target.value.length) {
-          let activeItemIdx = target.value.findIndex((x) => x.active);
+          let activeItemIdx = target.value.findIndex((x: any) => x.active);
           if (activeItemIdx !== -1) {
             if (activeItemIdx > 0) {
               activeItemIdx -= 1;
@@ -109,7 +124,7 @@ const startKeyboardListeners = () => {
 
       if (e.key === "Enter") {
         if (target.value.length) {
-          let activeItemIdx = target.value.findIndex((x) => x.active);
+          let activeItemIdx = target.value.findIndex((x: any) => x.active);
           if (activeItemIdx >= 0 && target.value[activeItemIdx]) {
             onSuggestionClick(target.value[activeItemIdx], checkMySearch);
             emit("update:searchValue");
@@ -224,7 +239,7 @@ const generateLink = (text: string) => {
       </li>
     </ul>
     <RouterLink
-      v-if="searchValue"
+      v-if="!!searchValue"
       class="check-all-results-link"
       :to="generateLink(searchValue)"
       @click="onCheckAllResultsLinkClick"

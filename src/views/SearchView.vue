@@ -1,5 +1,5 @@
 <script lang="ts">
-import { ref, defineComponent } from "vue";
+import { defineComponent } from "vue";
 import { useRoute } from "vue-router";
 import MainLayout from "@/layouts/MainLayout.vue";
 import ipsum from "@/mocks/json/lorem/ipsum.json";
@@ -7,6 +7,13 @@ import ipsum from "@/mocks/json/lorem/ipsum.json";
 export default defineComponent({
   components: {
     MainLayout,
+  },
+  setup() {
+    const route = useRoute();
+
+    return {
+      route,
+    };
   },
   data() {
     return {
@@ -18,13 +25,6 @@ export default defineComponent({
       return this.route.params.query;
     },
   },
-  setup() {
-    const route = useRoute();
-
-    return {
-      route,
-    };
-  },
 });
 </script>
 
@@ -34,9 +34,9 @@ export default defineComponent({
       <blockquote>
         <h1>Searched content: </h1> {{ searchQuery }}
       </blockquote>
-      <br /> <br />
+      <br> <br>
       <p>
-        {{  ipsum.text.repeat(120) }}
+        {{ ipsum.text.repeat(120) }}
       </p>
     </div>
   </MainLayout>

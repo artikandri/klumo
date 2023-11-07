@@ -1,6 +1,6 @@
 
 <script lang="ts">
-import { PropType, ButtonHTMLAttributes, ImgHTMLAttributes } from "vue";
+import type { PropType, ButtonHTMLAttributes, ImgHTMLAttributes } from "vue";
 
 export default {
   name: "BaseButton",

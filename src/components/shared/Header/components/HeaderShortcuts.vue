@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, inject } from "vue";
 import router from "@/router/index";
+import type IsMobileMenuVisible from "@/types/IsMobileMenuVisible";
 
 // inject
 const { isMobileMenuVisible, setIsMobileMenuVisible } = inject(
   "isMobileMenuVisible"
-);
+) as IsMobileMenuVisible;
 
 const popularUrls = ref([
   {

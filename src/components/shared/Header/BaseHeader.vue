@@ -1,5 +1,5 @@
 <script lang="ts">
-import { provide, ref, setup, inject } from "vue";
+import { provide, ref } from "vue";
 import SearchBar from "@/components/shared/SearchBar/SearchBar.vue";
 import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
 import HeaderShortcuts from "@/components/shared/Header/components/HeaderShortcuts.vue";
@@ -10,7 +10,7 @@ import closeIcon from "@/assets/icons/close.png";
 import menuIcon from "@/assets/icons/menu.png";
 
 export default {
-  name: "Header",
+  name: "BaseHeader",
   components: {
     SearchBar,
     BaseButton,
@@ -84,11 +84,12 @@ export default {
       this.setIsReplaced(hasReachedPoint);
     },
     onSearchButtonClick() {
+      const base = this.$refs.searchBar as any;
       this.setIsReplaced(false);
       this.setFullscreen(true);
       this.fullscreen = true;
       this.key += 1;
-      this.$refs.searchBar && this.$refs.searchBar.setInputFocus(true);
+      base && base.setInputFocus(true);
     },
     onToggleButtonClick() {
       this.isMobileMenuVisible = !this.isMobileMenuVisible;
@@ -97,8 +98,9 @@ export default {
       this.isMobileMenuVisible = false;
     },
     onClickingOutsideSearchEvent() {
-      if (this.$refs.searchBar && this.$refs.searchBar.isHistoryShown) {
-        this.$refs.searchBar.setIsHistoryShown(false);
+      const base = this.$refs.searchBar as any;
+      if (base && base.isHistoryShown) {
+        base.setIsHistoryShown(false);
         this.setFullscreen(false);
       }
     },

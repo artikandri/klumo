@@ -10,5 +10,15 @@
     {
       "path": "./tsconfig.vitest.json"
     }
-  ]
+  ],
+
+  "include": [
+    "src", "./*/*.d.ts"
+  ],
+  "allowJs": true,
+  "compilerOptions": {
+    "paths": {
+        "*": ["./types/*"]
+    }
+  }
 }

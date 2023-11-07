@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 import history from '@/mocks/json/search/history.json'
 import suggestions from '@/mocks/json/search/suggestions.json';
 
-import { randomValue } from "@/utilities/utils.js"
+import { randomValue } from "@/utilities/utils"
 
 export const useSearchHistory = defineStore('searchHistory', () => {
   const searchHistory = ref(history)
@@ -16,12 +16,12 @@ export const useSearchHistory = defineStore('searchHistory', () => {
     })
   }
   function setAllMySearchesInactive() {
-    searchHistory.value.mySearches.forEach((search) => {
+    searchHistory.value.mySearches.forEach((search : any) => {
       search.active = false;
     })
   }
   function setAllSuggestionsInactive() {
-    searchSuggestions.value.forEach((search) => {
+    searchSuggestions.value.forEach((search : any) => {
       search.active = false;
     })
   }
@@ -33,8 +33,6 @@ export const useSearchHistory = defineStore('searchHistory', () => {
     })
   }
 
-  return { searchHistory, searchSuggestions, 
-    setAllMySearchesInactive, setAllSuggestionsInactive, 
-    addMySearchHistory, addSuggestions }
+  return { searchHistory, searchSuggestions, setAllMySearchesInactive, setAllSuggestionsInactive, addMySearchHistory, addSuggestions }
 })
 

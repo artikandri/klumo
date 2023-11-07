@@ -1,19 +1,13 @@
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  computed,
-  provide,
-  inject,
-  defineExpose,
-  watch,
-} from "vue";
+import { ref, onMounted, provide, inject, defineExpose } from "vue";
 import router from "@/router/index";
 import { useSearchHistory } from "@/stores/search";
 import { toKebabCase, randomValue } from "@/utilities/utils";
 import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
 import SearchHistory from "./components/SearchHistory.vue";
 import closeIcon from "@/assets/icons/close.png";
+import type IsReplaced from "@/types/IsReplaced";
+import type Fullscreen from "@/types/Fullscreen";
 
 // store
 const {
@@ -24,8 +18,13 @@ const {
 } = useSearchHistory();
 
 // inject
-const { fullscreen, setFullscreen } = inject("fullscreen");
-const { setIsReplaced } = inject("isReplaced");
+const { fullscreen, setFullscreen } = inject("fullscreen", {
+  fullscreen: false,
+  setFullscreen: (value: boolean) => {},
+}) as unknown as Fullscreen;
+const { setIsReplaced } = inject("isReplaced", {
+  setIsReplaced: (value: boolean) => {},
+}) as IsReplaced;
 
 // data
 const isHistoryShown = ref(false);
@@ -87,7 +86,7 @@ const onUpdateSearchValueEvent = () => {
   isHistoryShown.value = false;
   isFocused.value = false;
   setFullscreen(false);
-  searchInput.value.blur();
+  (searchInput.value as unknown as any).blur();
   setAllMySearchesInactive();
   setAllSuggestionsInactive();
 };
@@ -146,9 +145,9 @@ const setIsHistoryShown = (value: boolean) => {
 };
 const setInputFocus = (value: boolean) => {
   if (value) {
-    searchInput.value.focus();
+    (searchInput.value as unknown as any).focus();
   } else {
-    searchInput.value.blur();
+    (searchInput.value as unknown as any).blur();
   }
 };
 
@@ -166,7 +165,7 @@ provide("isHistoryShown", {
 provide("searchInput", {
   searchInput,
   setSearchInputBlur: () => {
-    searchInput.value.blur();
+    (searchInput.value as unknown as any).blur();
   },
 });
 

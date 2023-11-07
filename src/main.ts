@@ -5,7 +5,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-import { clickOutside } from './utilities/directives'
+import { clickOutside } from '@/utilities/directives'
 
 const app = createApp(App)
 
