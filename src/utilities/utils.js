@@ -13,6 +13,7 @@ export const isElementVisible = (el, holder) => {
 };
 
 export const toKebabCase = (text) => {
+  if (!text) return "";
   return text.split(" ").join("-").toLowerCase();
 };
 

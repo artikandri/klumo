@@ -10,19 +10,24 @@ export const useSearchHistory = defineStore('searchHistory', () => {
   const searchHistory = ref(history)
   const searchSuggestions = ref(suggestions);
   function addMySearchHistory(history: string) {
-    searchHistory.value.mySearches.unshift({
+    history && searchHistory.value.mySearches.unshift({
       text: history,
       lastSearched: new Date().toLocaleDateString(),
     })
   }
+  function setAllMySearchesInactive() {
+    searchHistory.value.mySearches.forEach((search) => {
+      search.active = false;
+    })
+  }
 
   function addSuggestions(suggestion: string) {
-    searchSuggestions.value.unshift({
+    suggestion && searchSuggestions.value.unshift({
       text: suggestion,
       similarity: randomValue(0, 1)
     })
   }
 
-  return { searchHistory, searchSuggestions, addMySearchHistory, addSuggestions }
+  return { searchHistory, searchSuggestions, addMySearchHistory, setAllMySearchesInactive, addSuggestions }
 })
 

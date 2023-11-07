@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, inject } from "vue";
 const popularUrls = ref([
   {
     url: "/collections/posters",
@@ -14,11 +14,19 @@ const popularUrls = ref([
     text: "New Arrivals",
   },
 ]);
+
+// inject
+const { isMobileMenuVisible, setIsMobileMenuVisible } = inject(
+  "isMobileMenuVisible"
+);
 </script>
 
 <template>
   <div class="shortcuts-list-area">
-    <ul class="shortcuts-list">
+    <ul
+      class="shortcuts-list"
+      :class="{'--visible': isMobileMenuVisible }"
+    >
       <li
         v-for="(popularUrl, idx) in popularUrls"
         :key="`popular_url_${idx}`"
@@ -51,7 +59,7 @@ const popularUrls = ref([
     display: none;
 
     &.--visible {
-      display: block;
+      display: flex;
     }
   }
 }

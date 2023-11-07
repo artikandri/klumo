@@ -1,20 +1,14 @@
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  computed,
-  defineEmits,
-  defineProps,
-  inject,
-} from "vue";
-import { uniqBy } from "lodash";
+import { ref, onMounted, computed, provide, inject } from "vue";
 import router from "@/router/index";
 import { useSearchHistory } from "@/stores/search";
 import { toKebabCase, randomValue } from "@/utilities/utils";
 import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
+import SearchHistory from "./components/SearchHistory.vue";
+import closeIcon from "@/assets/icons/close.png";
 
 // store
-const { searchHistory, searchSuggestions, addMySearchHistory, addSuggestions } =
+const { addMySearchHistory, setAllMySearchesInactive, addSuggestions } =
   useSearchHistory();
 
 // inject
@@ -26,26 +20,29 @@ const isFocused = ref(false);
 const searchValue = ref("");
 const placeholder = ref("");
 let isBlinking = ref(false);
+const searchInput = ref("searchInput");
+
+// provide
+provide("searchValue", {
+  searchValue,
+  setSearchValue: (value: string) => {
+    searchValue.value = value;
+  },
+});
+provide("isHistoryShown", {
+  isHistoryShown,
+  setIsHistoryShown: (value: boolean) => {
+    isHistoryShown.value = value;
+  },
+});
 
 // static
 const placeholderText = "Search for designs";
 const placeholderTextOptions = ["designs", "artworks", "brands", "pictures"];
 
-// computed
-const searchSuggestionsFiltered = computed(() => {
-  return uniqBy(
-    searchSuggestions.filter((s) => s.text.includes(searchValue.value)),
-    "text"
-  );
-});
-const isFullscreen = computed(() => {
-  return fullscreen.value as unknown as boolean;
-});
-const mySearches = computed(() => {
-  return uniqBy(searchHistory.mySearches, "text");
-});
-const popularSearches = computed(() => {
-  return uniqBy(searchHistory.popularSearches, "text");
+// mounted
+onMounted(() => {
+  startTypingEffect();
 });
 
 // methods
@@ -54,29 +51,39 @@ const goToSearchPage = () => {
 };
 const onSearchInputFocus = () => {
   isFocused.value = true;
-  isHistoryShown.value = true;
   setFullscreen(true);
+  isHistoryShown.value = true;
 };
 const onSearchInputBlur = () => {
   isFocused.value = false;
 };
-const onSearchInputEnter = () => {
-  addMySearchHistory(searchValue.value);
-  addSuggestions(searchValue.value);
-  goToSearchPage();
-};
-const onClearHistoryButtonClick = () => {
-  searchHistory.mySearches = [];
+const onSearchInputEnter = (event: any) => {
+  if (searchValue.value) {
+    addMySearchHistory(searchValue.value);
+    addSuggestions(searchValue.value);
+    goToSearchPage();
+    isHistoryShown.value = false;
+    setFullscreen(false);
+    event.target.blur();
+    setAllMySearchesInactive();
+  }
 };
 const onCancelButtonClick = () => {
   isHistoryShown.value = false;
   setFullscreen(false);
+  searchValue.value = "";
 };
-const onSuggestionClick = (suggestion: any) => {
-  searchValue.value = suggestion.text;
-  goToSearchPage();
+const onDeleteButtonClick = () => {
+  searchValue.value = "";
+  isBlinking.value = false;
 };
-
+const onUpdateSearchValueEvent = () => {
+  isHistoryShown.value = false;
+  isFocused.value = false;
+  setFullscreen(false);
+  searchInput.value.blur();
+  setAllMySearchesInactive();
+};
 const startDeletionEffect = (text: string) => {
   let currentText = text;
   let index = text.length - 1;
@@ -127,24 +134,23 @@ const startTypingEffect = () => {
 
   typeText();
 };
-
-// mounted
-onMounted(() => {
-  startTypingEffect();
-});
 </script>
 <template>
   <div
     class="search-bar"
-    :class="[isFullscreen ? '--fullscreen' : '']"
+    :class="[fullscreen ? '--fullscreen' : '']"
   >
     <div class="search-bar__container">
       <div class="search-bar-border">
+        <img
+          src="@/assets/icons/search.png"
+          alt="search"
+          class="svg-icon"
+        />
         <input
-          :autofocus="isFullscreen"
+          :autofocus="fullscreen"
           type="search"
           ref="searchInput"
-          class="imitatefocus"
           autocomplete="off"
           spellcheck="false"
           v-model.trim="searchValue"
@@ -158,79 +164,27 @@ onMounted(() => {
           :class="{'--blinking': isBlinking, '--visible': !isFocused && !searchValue }"
           ref="placeholderImitation"
         >Search for {{ placeholder  }}</span>
+        <BaseButton
+          v-if="searchValue"
+          :icon="closeIcon"
+          class="delete-button"
+          text=""
+          @click="onDeleteButtonClick"
+        />
       </div>
 
       <BaseButton
-        v-show="isFullscreen"
+        v-show="fullscreen"
         text="Cancel"
         class="cancel-button"
         @click="onCancelButtonClick"
       />
     </div>
     <div
-      v-if="isHistoryShown"
+      v-show="isHistoryShown"
       class="search-bar__history"
     >
-      <div class="history-container">
-        <div>
-          <div v-if="!searchValue">
-            <div>
-              <h2>
-                Your search history
-              </h2>
-              <BaseButton
-                @click="onClearHistoryButtonClick"
-                text="Clear history"
-              >
-              </BaseButton>
-              <ul class="search-list">
-                <li
-                  v-for="(mySearch, idx) in mySearches.slice(0, 5)"
-                  :key="`my_search_${idx}`"
-                  @click="onSuggestionClick(mySearch)"
-                  class="search-list__item"
-                >
-                  {{ mySearch.text }}
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h2>
-                Popular searches
-              </h2>
-              <ul class="search-list">
-                <li
-                  v-for="(popularSearch, idx) in popularSearches"
-                  :key="`popular_search_${idx}`"
-                  @click.native="onSuggestionClick(popularSearch)"
-                  class="search-list__item"
-                >
-                  {{ popularSearch.text }}
-                </li>
-              </ul>
-            </div>
-          </div>
-          <ul
-            v-else
-            class="search-list"
-          >
-            <li
-              v-for="(suggestion, idx) in searchSuggestionsFiltered"
-              :key="`search_suggestion_${idx}`"
-              @click.native="onSuggestionClick(suggestion)"
-              class="search-list__item"
-            >
-              {{  suggestion.text }}
-            </li>
-          </ul>
-        </div>
-        <div
-          class="background"
-          @click="isHistoryShown = false"
-        ></div>
-      </div>
-
+      <SearchHistory @update:searchValue="onUpdateSearchValueEvent" />
     </div>
   </div>
 </template>
@@ -353,18 +307,6 @@ onMounted(() => {
       left: 0;
       top: 0;
       display: block;
-    }
-  }
-}
-
-.search-list {
-  &__item {
-    padding: 5px 2.5px;
-    display: block;
-
-    &:hover {
-      background-color: palette(grey, 700);
-      cursor: pointer;
     }
   }
 }

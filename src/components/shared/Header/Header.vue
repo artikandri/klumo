@@ -3,10 +3,8 @@ import { provide, ref, setup } from "vue";
 import SearchBar from "@/components/shared/SearchBar/SearchBar.vue";
 import BaseButton from "@/components/shared/BaseButton/BaseButton.vue";
 import HeaderShortcuts from "@/components/shared/Header/components/HeaderShortcuts.vue";
+import HeaderActions from "@/components/shared/Header/components/HeaderActions.vue";
 
-import wishlistIcon from "@/assets/icons/wishlist.png";
-import accountIcon from "@/assets/icons/account.png";
-import cartIcon from "@/assets/icons/cart.png";
 import searchIcon from "@/assets/icons/search.png";
 import closeIcon from "@/assets/icons/close.png";
 import menuIcon from "@/assets/icons/menu.png";
@@ -17,17 +15,14 @@ export default {
     SearchBar,
     BaseButton,
     HeaderShortcuts,
+    HeaderActions,
   },
   data() {
     return {
-      accountIcon,
-      cartIcon,
-      wishlistIcon,
       searchIcon,
       closeIcon,
       menuIcon,
       isReplaced: false,
-      isMobileMenuVisible: false,
     };
   },
   setup() {
@@ -36,9 +31,23 @@ export default {
       fullscreen.value = value;
     };
 
-    provide("fullscreen", { fullscreen, setFullscreen });
+    const isMobileMenuVisible = ref(false);
+    const setIsMobileMenuVisible = (value: boolean) => {
+      isMobileMenuVisible.value = value;
+    };
 
-    return { fullscreen, setFullscreen };
+    provide("fullscreen", { fullscreen, setFullscreen });
+    provide("isMobileMenuVisible", {
+      isMobileMenuVisible,
+      setIsMobileMenuVisible,
+    });
+
+    return {
+      fullscreen,
+      setFullscreen,
+      isMobileMenuVisible,
+      setIsMobileMenuVisible,
+    };
   },
   mounted() {
     window.addEventListener("scroll", this.onHeaderScroll);
@@ -100,25 +109,17 @@ export default {
           </div>
         </div>
         <div class="actions-area">
-          <BaseButton
-            v-if="isReplaced"
-            :icon="searchIcon"
-            class="search-button"
-            text="Search"
-            @click="onSearchButtonClick"
-          />
-          <BaseButton
-            :icon="wishlistIcon"
-            text="Wishlist"
-          />
-          <BaseButton
-            :icon="accountIcon"
-            text="Account"
-          />
-          <BaseButton
-            :icon="cartIcon"
-            text="Cart"
-          />
+          <HeaderActions>
+            <template v-slot:searchIcon>
+              <BaseButton
+                v-if="isReplaced"
+                :icon="searchIcon"
+                class="search-button"
+                text="Search"
+                @click="onSearchButtonClick"
+              />
+            </template>
+          </HeaderActions>
         </div>
       </div>
       <div
@@ -214,6 +215,13 @@ export default {
       position: fixed;
       top: 0;
       left: 0;
+      z-index: 10;
+      background: palette(white, base);
+
+      .shortcuts-list-area {
+        z-index: 11;
+        position: relative;
+      }
     }
   }
 }
