@@ -14,7 +14,7 @@
 
   "include": [
     "src", "./*/*.d.ts"
-  ],
+, "modules.d.ts"  ],
   "allowJs": true,
   "compilerOptions": {
     "paths": {
