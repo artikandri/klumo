@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject } from "vue";
+import { ref, inject, onMounted } from "vue";
 import router from "@/router/index";
 import type IsMobileMenuVisible from "@/types/IsMobileMenuVisible";
 
@@ -23,6 +23,17 @@ const popularUrls = ref([
   },
 ]);
 
+const additionalMenus = ref([
+  {
+    url: "/wishlist",
+    text: "Wishlist",
+  },
+  {
+    url: "/accounts",
+    text: "Accounts",
+  },
+]);
+
 const onUrlClick = (url: string = "") => {
   url && router.push(url);
   setIsMobileMenuVisible(false);
@@ -42,6 +53,15 @@ const onUrlClick = (url: string = "") => {
         @click="onUrlClick(popularUrl.url)"
       >
         {{ popularUrl.text }}
+      </li>
+      <li
+        class="shortcuts-list__item --phone-large-only"
+        v-for="(additionalMenu, idx) in additionalMenus"
+        :key="`adt_menu_${idx}`"
+        @click="onUrlClick(additionalMenu
+      .url)"
+      >
+        {{  additionalMenu.text  }}
       </li>
     </ul>
   </div>
@@ -65,6 +85,10 @@ const onUrlClick = (url: string = "") => {
   text-align: center;
 
   &__item {
+    &.--phone-large-only {
+      display: none;
+    }
+
     > a {
       text-decoration: none;
     }
@@ -89,6 +113,14 @@ const onUrlClick = (url: string = "") => {
 
       &:not(:last-child) {
         border-bottom: 1px solid palette(grey, 600);
+      }
+
+      &.--phone-large-only {
+        display: none;
+
+        @include media("<=phoneLarge") {
+          display: block;
+        }
       }
     }
   }

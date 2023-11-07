@@ -41,5 +41,11 @@ export default {
 .header-actions {
   display: flex;
   flex-direction: row;
+
+  @include media("<=phoneLarge") {
+    > * {
+      display: none;
+    }
+  }
 }
 </style>

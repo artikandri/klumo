@@ -137,6 +137,12 @@ const startKeyboardListeners = () => {
 };
 const onClearHistoryButtonClick = () => {
   searchHistory.mySearches = [];
+  setIsReplacedOnTablet();
+};
+const setIsReplacedOnTablet = () => {
+  if (window.innerWidth <= 768) {
+    setIsReplaced(true);
+  }
 };
 const onSuggestionClick = (
   suggestion: any,
@@ -145,10 +151,8 @@ const onSuggestionClick = (
   setSearchValue(suggestion.text);
   setIsHistoryShown(false);
   setFullscreen(false);
+  setIsReplacedOnTablet();
   goToSearchPage(suggestion.text);
-  if (window.innerWidth <= 768) {
-    setIsReplaced(true);
-  }
   if (addToSuggestion) {
     addSuggestions(suggestion.text);
   }
@@ -156,9 +160,7 @@ const onSuggestionClick = (
 const onCheckAllResultsLinkClick = () => {
   setFullscreen(false);
   setIsHistoryShown(false);
-  if (window.innerWidth <= 768) {
-    setIsReplaced(true);
-  }
+  setIsReplacedOnTablet();
 };
 const goToSearchPage = (text: string = "") => {
   router.push(`/search/${toKebabCase(text || searchValue.value)}`);

@@ -127,6 +127,12 @@ a {
     @include font-size(14px);
     @include line-height(21px);
   }
+
+
+  @include media("<=phoneLarge") {
+    @include font-size(12px);
+    @include line-height(18px);
+  }
 }
 
 .--semibold {

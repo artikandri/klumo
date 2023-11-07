@@ -8,6 +8,7 @@ import HeaderActions from "@/components/shared/Header/components/HeaderActions.v
 import searchIcon from "@/assets/icons/search.png";
 import closeIcon from "@/assets/icons/close.png";
 import menuIcon from "@/assets/icons/menu.png";
+import cartIcon from "@/assets/icons/cart.png";
 
 export default {
   name: "BaseHeader",
@@ -22,6 +23,7 @@ export default {
       searchIcon,
       closeIcon,
       menuIcon,
+      cartIcon,
       windowWidth: 0,
       key: 0,
       isMobile: true,
@@ -125,6 +127,7 @@ export default {
             :icon="menuIcon"
             class="menu-toggle"
             icon-size="2x"
+            style="padding: 0; "
             @click="onToggleButtonClick"
           >
           </BaseButton>
@@ -168,6 +171,14 @@ export default {
           class="mobile-menu-area"
           v-if="isMobileMenuVisible"
         >
+
+          <BaseButton
+            :icon="cartIcon"
+            text="Cart"
+            variant="clean"
+            class="cart-icon --phone-large-only"
+          />
+
           <BaseButton
             :icon="closeIcon"
             text="Close"
@@ -214,6 +225,9 @@ export default {
     background-color: palette(white, base);
     border-bottom: 1px solid palette(grey, 600);
 
+    @include media("<=phoneLarge") {
+      padding: 20px $base-space * 3;
+    }
     .menu-area {
       display: none;
 
@@ -230,6 +244,10 @@ export default {
 
       .logo {
         height: 40px;
+
+        @include media("<=phoneLarge") {
+          height: 30px;
+        }
       }
     }
 
@@ -263,6 +281,13 @@ export default {
     transition: margin-top 0.3s ease 0s, background-color 0.3s ease-out 0s;
     border-bottom: 1px solid palette(grey, 600);
 
+    .cart-icon {
+      display: none;
+
+      @include media("<=phoneLarge") {
+        display: block;
+      }
+    }
     .mobile-menu-area {
       text-align: right;
       padding: 20px;

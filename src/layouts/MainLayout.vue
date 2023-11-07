@@ -2,7 +2,7 @@
 import BaseHeader from "../components/shared/Header/BaseHeader.vue";
 </script>
 <template>
-  <div class="layout">
+  <div class="layout --body1">
     <div class="header-area">
       <BaseHeader />
     </div>
@@ -30,8 +30,14 @@ $gap-width: $base-space * 5;
   position: relative;
   z-index: 0;
   padding: $gap-width;
+  min-height: 150vh;
 
   @include media("<=tablet") {
+    padding-top: $base-space * 12;
+  }
+
+  @include media("<=phoneLarge") {
+    padding: $base-space * 3;
     padding-top: $base-space * 12;
   }
 
