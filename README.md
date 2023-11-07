@@ -52,3 +52,13 @@ npm run test:unit
 ```sh
 npm run lint
 ```
+## Screenshots
+
+<img src="https://github.com/artikandri/klumo/blob/master/screenshots/01.png?raw=true">
+<img src="https://github.com/artikandri/klumo/blob/master/screenshots/02.png?raw=true">
+<img src="https://github.com/artikandri/klumo/blob/master/screenshots/03.png?raw=true">
+<img src="https://github.com/artikandri/klumo/blob/master/screenshots/04.png?raw=true">
+<img src="https://github.com/artikandri/klumo/blob/master/screenshots/05.png?raw=true">
+<img src="https://github.com/artikandri/klumo/blob/master/screenshots/06.png?raw=true">
+
+
